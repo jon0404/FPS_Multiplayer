@@ -9,6 +9,7 @@ public class WeaponsController : NetworkBehaviour
     public GameObject impactEffect, damageEffect;
     public LayerMask validLayers;
     public GameObject muzzleFlare;
+    [SerializeField] private int damage = 10;
 
     public float flareDisplayTime = .1f;
     private float flareCounter;
@@ -36,20 +37,20 @@ public class WeaponsController : NetworkBehaviour
 
     public void Shoot()
     {
-        RaycastHit hit;
-        if(Physics.Raycast(cam.position, cam.forward, out hit, range, validLayers))
+        muzzleFlare.SetActive(true);
+        flareCounter = flareDisplayTime;
+        if(Physics.Raycast(cam.position, cam.forward, out var hit, range, validLayers))
         {
             Debug.Log(hit.transform.name);
-            if(hit.transform.tag == "Enemy")
+            if(hit.transform.TryGetComponent(out PlayerHealth playerHealth))
             {
                 Instantiate(damageEffect, hit.point, Quaternion.identity);
+                playerHealth.ChangeHealth(-damage);
             } 
             else
             {            
             Instantiate(impactEffect, hit.point, Quaternion.identity);
             }
         }
-        muzzleFlare.SetActive(true);
-        flareCounter = flareDisplayTime;
     }
 }

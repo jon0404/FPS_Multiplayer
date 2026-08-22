@@ -10,7 +10,6 @@ public class PlayerController : NetworkBehaviour
 
     public InputActionReference moveAction;
     public InputActionReference lookAction;
-    public InputActionReference shootAction;
     private Vector2 rotStore;
     public float lookSpeed;
     private Vector3 currentMovement;
@@ -102,13 +101,6 @@ public class PlayerController : NetworkBehaviour
 
         transform.rotation = Quaternion.Euler(0f, rotStore.x, 0f);
         theCam.transform.localRotation = Quaternion.Euler(rotStore.y, 0f, 0f);
-
-
-        //handle shooting
-        if(shootAction.action.WasPressedThisFrame())
-        {
-            weaponCon.Shoot();
-        }
     }
 }
 // 
