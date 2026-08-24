@@ -1,7 +1,11 @@
+using System.Collections.Generic;
+using System.ComponentModel.Design;
 using PurrNet;
+using PurrNet.StateMachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.Rendering.Universal.Internal;
 
 public class PlayerController : NetworkBehaviour
 {
@@ -23,8 +27,9 @@ public class PlayerController : NetworkBehaviour
     public float jumpPower;
     public float gravityModifier = 4f;
     public float runSpeed;
-    public WeaponsController weaponCon;
-
+    [SerializeField] private StateMachine stateMachine;
+    [SerializeField] List<StateNode> weaponStates = new();
+    [SerializeField] private NetworkAnimator animator;
 
 
     public float camZoomNormal, camZoomOut, camZoomSpeed;
@@ -34,9 +39,12 @@ public class PlayerController : NetworkBehaviour
         base.OnSpawned();
 
         enabled = isOwner;
-
         if(!isOwner)
-            Destroy(theCam.gameObject);
+            return;
+        theCam.gameObject.SetActive(true);
+        Debug.Log("StateMachine activeSelf: " + stateMachine.gameObject.activeSelf);
+        Debug.Log("StateMachine activeInHierarchy: " + stateMachine.gameObject.activeInHierarchy);
+        stateMachine.SetState(weaponStates[0]);
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -51,11 +59,7 @@ public class PlayerController : NetworkBehaviour
         float yStore = currentMovement.y;
 
         Vector2 moveInput = moveAction.action.ReadValue<Vector2>();
-        
-
-
-
-    
+        Debug.Log($"{moveInput}");
         Vector3 moveForward = transform.forward * moveInput.y;
         Vector3 moveSideways = transform.right * moveInput.x;
 
@@ -101,6 +105,10 @@ public class PlayerController : NetworkBehaviour
 
         transform.rotation = Quaternion.Euler(0f, rotStore.x, 0f);
         theCam.transform.localRotation = Quaternion.Euler(rotStore.y, 0f, 0f);
+
+        //handle animation
+        animator.SetFloat("Forward", moveInput.y);
+        animator.SetFloat("Sideways", moveInput.x);
     }
 }
 // 

@@ -358,6 +358,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2fdf262bdefcc18488869757e46fec11, type: 3}
       insertIndex: -1
       addedObject: {fileID: 192727271}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2fdf262bdefcc18488869757e46fec11, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 192727273}
   m_SourcePrefab: {fileID: 100100000, guid: 2fdf262bdefcc18488869757e46fec11, type: 3}
 --- !u!1 &192727270 stripped
 GameObject:
@@ -387,6 +390,28 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &192727273
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 192727270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d42a2a1612d9cef4b80f82583fabac30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Surface
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  surfaceType: 1
 --- !u!1 &199867400
 GameObject:
   m_ObjectHideFlags: 0
@@ -425,7 +450,7 @@ MonoBehaviour:
   _parent: {fileID: 0}
   _invertedPathToNearestParent: 
   _directChildren: []
-  minPlayers: 2
+  minPlayers: 1
 --- !u!4 &199867402
 Transform:
   m_ObjectHideFlags: 0
@@ -1338,6 +1363,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 84db591af76b90d44ad46bb1b76f0481, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1399370534}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 84db591af76b90d44ad46bb1b76f0481, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1399370537}
   m_SourcePrefab: {fileID: 100100000, guid: 84db591af76b90d44ad46bb1b76f0481, type: 3}
 --- !u!4 &662608583 stripped
 Transform:
@@ -1841,6 +1869,28 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -452379126297630285, guid: 84db591af76b90d44ad46bb1b76f0481, type: 3}
+--- !u!114 &1399370537
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1399370530}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d42a2a1612d9cef4b80f82583fabac30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Surface
+  _networkRules: {fileID: 0}
+  _visitiblityRules: {fileID: 0}
+  _isSetup: 0
+  _prefabId: -2147483648
+  _componentIndex: -2147483648
+  _shouldBePooled: 0
+  _parent: {fileID: 0}
+  _invertedPathToNearestParent: 
+  _directChildren: []
+  surfaceType: 0
 --- !u!1001 &1602920807
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2150,7 +2200,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: PurrNet.Runtime::PurrNet.Transports.UDPTransport
   _automaticCloudSetups:
     _adaptToEdgegap: 1
-  _serverPort: 5000
+  _serverPort: 5001
   _maxConnections: 100
   _address: 127.0.0.1
   _timeoutInSeconds: 5

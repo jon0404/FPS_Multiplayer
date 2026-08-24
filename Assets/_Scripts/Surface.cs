@@ -8,5 +8,6 @@ public class Surface : NetworkBehaviour
         Player
     }
 
-    public SurfaceType surfaceType;
+    [SerializeField] private SurfaceType surfaceType;
+    public SurfaceType Type => surfaceType;
 }
