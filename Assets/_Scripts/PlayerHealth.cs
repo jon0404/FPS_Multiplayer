@@ -44,6 +44,7 @@ public class PlayerHealth : NetworkBehaviour
         foreach (Transform child in obj.transform) // enumerates the transform and gets the transforms of children (idk)
         {
             SetLayerRecursive(child.gameObject, layer);
+
         }
     }
 

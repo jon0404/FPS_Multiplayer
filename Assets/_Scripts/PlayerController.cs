@@ -1,37 +1,45 @@
+using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
+using System.Runtime.InteropServices;
 using PurrNet;
 using PurrNet.StateMachine;
+using Unity.Cinemachine;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.PlayerLoop;
 using UnityEngine.Rendering.Universal.Internal;
 
 public class PlayerController : NetworkBehaviour
-{
-	public CharacterController charCon;
-    public float moveSpeed;
+{   
+    [SerializeField] private LayerMask layers;
+	[SerializeField] private CharacterController charCon;
+    [SerializeField] private float moveSpeed;
 
-    public InputActionReference moveAction;
-    public InputActionReference lookAction;
+    [SerializeField] private InputActionReference moveAction;
+    [SerializeField] private InputActionReference lookAction;
     private Vector2 rotStore;
-    public float lookSpeed;
+    [SerializeField] private float lookSpeed;
     private Vector3 currentMovement;
 
-    public Camera theCam;
+    [SerializeField] private CinemachineCamera theCam;
 
-    public float minViewAngle, maxViewAngle;
+    [SerializeField] private float minViewAngle, maxViewAngle;
 
-    public InputActionReference jumpAction;
-    public InputActionReference sprintAction;
-    public float jumpPower;
-    public float gravityModifier = 4f;
-    public float runSpeed;
-    [SerializeField] private StateMachine stateMachine;
-    [SerializeField] List<StateNode> weaponStates = new();
+    [SerializeField] private InputActionReference jumpAction;
+    [SerializeField] private InputActionReference sprintAction;
+    [SerializeField] private InputActionReference interactAction;
+    [SerializeField] private float interactRange = 3;
+    [SerializeField] private int interactCooldown = 20;
+    private int interactElapsed = 0;
+
+    [SerializeField] private float jumpPower;
+    [SerializeField] private float gravityModifier = 4f;
+    [SerializeField] private float runSpeed;
     [SerializeField] private NetworkAnimator animator;
-
-
+    [SerializeField] List<Renderer> renderers = new();
+    //public Usable.itemType
     public float camZoomNormal, camZoomOut, camZoomSpeed;
 
     protected override void OnSpawned()
@@ -41,10 +49,12 @@ public class PlayerController : NetworkBehaviour
         enabled = isOwner;
         if(!isOwner)
             return;
-        theCam.gameObject.SetActive(true);
-        Debug.Log("StateMachine activeSelf: " + stateMachine.gameObject.activeSelf);
-        Debug.Log("StateMachine activeInHierarchy: " + stateMachine.gameObject.activeInHierarchy);
-        stateMachine.SetState(weaponStates[0]);
+        foreach (var rend in renderers)
+        {
+            rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+        }
+        
+        theCam.gameObject.SetActive(isOwner);
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -59,7 +69,6 @@ public class PlayerController : NetworkBehaviour
         float yStore = currentMovement.y;
 
         Vector2 moveInput = moveAction.action.ReadValue<Vector2>();
-        Debug.Log($"{moveInput}");
         Vector3 moveForward = transform.forward * moveInput.y;
         Vector3 moveSideways = transform.right * moveInput.x;
 
@@ -67,15 +76,14 @@ public class PlayerController : NetworkBehaviour
         if(sprintAction.action.IsPressed())
         {
             currentMovement = (moveForward + moveSideways) * runSpeed;
-
             if(currentMovement != Vector3.zero)
-            theCam.fieldOfView = Mathf.Lerp(theCam.fieldOfView, camZoomOut, camZoomSpeed * Time.deltaTime);
+            theCam.Lens.FieldOfView = Mathf.Lerp(theCam.Lens.FieldOfView, camZoomOut, camZoomSpeed * Time.deltaTime);
         }
         else
         {
             currentMovement = (moveForward + moveSideways) * moveSpeed;
 
-            theCam.fieldOfView = Mathf.Lerp(theCam.fieldOfView, camZoomNormal, camZoomSpeed * Time.deltaTime);
+            theCam.Lens.FieldOfView = Mathf.Lerp(theCam.Lens.FieldOfView, camZoomNormal, camZoomSpeed * Time.deltaTime);
         }
 
         //handle gravity
@@ -109,6 +117,25 @@ public class PlayerController : NetworkBehaviour
         //handle animation
         animator.SetFloat("Forward", moveInput.y);
         animator.SetFloat("Sideways", moveInput.x);
+
+        if(interactAction.action.WasPressedThisFrame())
+            InteractInvoke();
+
+        if(interactAction.action.IsPressed())
+        {
+            interactElapsed++;
+            if(interactElapsed > interactCooldown)
+                InteractInvoke();
+        }
+    }
+    private void InteractInvoke()
+    {
+        if (!Physics.Raycast(theCam.transform.position, theCam.transform.forward, out var hit, interactRange, layers))
+            return;
+        Debug.Log("test");
+        hit.transform.TryGetComponent<IInteractable>(out var iinteractable);
+        iinteractable.Interact();
+        interactElapsed = 0;
     }
 }
 // 

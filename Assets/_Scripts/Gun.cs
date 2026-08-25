@@ -31,10 +31,12 @@ public class Gun : StateNode
     [SerializeField] private AnimationCurve positionCurve;
     [SerializeField] private AnimationCurve rotationCurve;
     [SerializeField] private AnimationCurve chargeCurve;
+    [SerializeField] private Transform rightHandTarget, leftHandTarget;
+    [SerializeField] private Transform rightIkTarget, leftIkTarget;
     private Coroutine _recoilCoroutine;
     protected override void OnSpawned()
     {
-        enabled = isOwner;
+
     }
 
     private void Start()
@@ -54,6 +56,8 @@ public class Gun : StateNode
     {
         base.StateUpdate(asServer);
 
+        SetIkTargets();
+
         if(asServer)
             return;
         if (!isOwner)
@@ -62,8 +66,6 @@ public class Gun : StateNode
             return;   
         Shoot();
         PlayShotEffects();
-        
-
     }
 
     private void Shoot()
@@ -98,6 +100,12 @@ public class Gun : StateNode
             StopCoroutine(_recoilCoroutine);
 
         _recoilCoroutine = StartCoroutine(Recoil()); 
+    }
+
+    private void SetIkTargets()
+    {
+        rightIkTarget.SetPositionAndRotation(rightHandTarget.position, rightHandTarget.rotation);
+        leftIkTarget.SetPositionAndRotation(leftHandTarget.position, leftHandTarget.rotation);
     }
 
     private IEnumerator MuzzleFlare()

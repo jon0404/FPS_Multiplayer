@@ -8,7 +8,6 @@ public class RotationMimic : NetworkBehaviour
     protected override void OnSpawned()
     {
         base.OnSpawned();
-
         enabled = isOwner;
     }
     void Update()
