@@ -6,5 +6,9 @@ using UnityEngine;
 
 public interface IInteractable
 {
-    void Interact();
+    void Interact(GameObject interactor);
+}
+public interface IItem
+{
+    void ToggleItem(GameObject item);
 }

@@ -128,14 +128,12 @@ public class PlayerController : NetworkBehaviour
                 InteractInvoke();
         }
     }
-    private void InteractInvoke()
+    public void InteractInvoke()
     {
         if (!Physics.Raycast(theCam.transform.position, theCam.transform.forward, out var hit, interactRange, layers))
             return;
-        Debug.Log("test");
         hit.transform.TryGetComponent<IInteractable>(out var iinteractable);
-        iinteractable.Interact();
+        iinteractable.Interact(charCon.gameObject);
         interactElapsed = 0;
     }
 }
-// 
