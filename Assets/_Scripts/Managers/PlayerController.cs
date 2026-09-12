@@ -39,6 +39,7 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private float runSpeed;
     [SerializeField] private NetworkAnimator animator;
     [SerializeField] List<Renderer> renderers = new();
+    [SerializeField] AudioListener audioListener;
     //public Usable.itemType
     public float camZoomNormal, camZoomOut, camZoomSpeed;
 
@@ -54,7 +55,8 @@ public class PlayerController : NetworkBehaviour
             rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
         }
         
-        theCam.gameObject.SetActive(isOwner);
+        theCam.gameObject.SetActive(true);
+        audioListener.enabled = true;
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -86,7 +88,6 @@ public class PlayerController : NetworkBehaviour
             theCam.Lens.FieldOfView = Mathf.Lerp(theCam.Lens.FieldOfView, camZoomNormal, camZoomSpeed * Time.deltaTime);
         }
 
-        //handle gravity
         if(charCon.isGrounded)
         {
             yStore = 0;

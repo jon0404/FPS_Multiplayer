@@ -1,35 +1,50 @@
 using UnityEngine;
-using System.Collections.Generic;
+using System;
 using TMPro;
 using PurrNet;
 using UnityEngine.UI;
 [System.Serializable]
-public class ItemArray
+public class HotbarSlots
 {
-    public GameObject itemObject;
+    public Image emptyIcon;
+    public RectTransform selectedIconTrans;
+    public Image itemIcon;
+    public RectTransform trans;
 }
-
 public class MainGameView : View
 {
+
     [SerializeField] private TMP_Text healthText;
     [SerializeField] private Image hotbar_icon_empty;
     [SerializeField] private Image hotbar_icon_selected; 
     [SerializeField] private Transform emptySlots;
     [SerializeField] private Transform itemIcons;
     [SerializeField] private int itemsSlotId;
-    [SerializeField] private ItemArray[] itemArray = new ItemArray[8];
+    private HotbarSlots[] hotbarSlots;
+    [SerializeField] private int maxSlots;
+    private RectTransform selectedIconTrans;
+
+
     private void Awake()
     {
-        itemArray[0] = new ItemArray();
-        itemArray[1] = new ItemArray();
-        itemArray[2] = new ItemArray();
-        itemArray[3] = new ItemArray();
-        itemArray[4] = new ItemArray();
-        itemArray[5] = new ItemArray();
-        itemArray[6] = new ItemArray();
-        itemArray[7] = new ItemArray();
+        InstanceHandler.RegisterInstance(this);   
+        selectedIconTrans = hotbar_icon_selected.GetComponent<RectTransform>();
+    }
+
+    public void Hotbar(int slotCount)
+    {
+        hotbarSlots = new HotbarSlots[slotCount];
+        Vector3 position = new Vector3(-300, -450, 0);
         InstanceHandler.RegisterInstance(this);
-        var rectTrans = hotbar_icon_selected.GetComponent<RectTransform>();
+        for(int i = 0; i < hotbarSlots.Length; i++)
+        {
+            hotbarSlots[i] = new HotbarSlots();
+            hotbarSlots[i].emptyIcon = Instantiate(hotbar_icon_empty, emptySlots);
+            hotbarSlots[i].emptyIcon.rectTransform.anchoredPosition = position;
+            position.x += 90;
+            hotbarSlots[i].trans = hotbarSlots[i].emptyIcon.rectTransform;      
+        }
+        UpdateSelected(0);
     }
     
 
@@ -53,49 +68,21 @@ public class MainGameView : View
         healthText.text = health.ToString();
     }
 
-    public void CreateSelected()
+    public void UpdateItemIcon(Image itemIcon, int slot)
     {
+        hotbarSlots[slot].itemIcon = Instantiate(itemIcon, emptySlots);
+        hotbarSlots[slot].itemIcon.rectTransform.anchoredPosition = hotbarSlots[slot].trans.anchoredPosition;
 
-    }
-
-    public void UpdateItemIcon(Item item, int slot)
-    {
-        var icon = Instantiate(item.icon, itemIcons);
-        itemArray[slot].itemObject = icon;
-        Vector3 position = new Vector3 (-300, -450, 0);
-        var rectTrans = icon.GetComponent<RectTransform>();
-        position.x += 90 * (slot);
-        rectTrans.anchoredPosition3D = position;
 
     }
 
     public void DeleteItemIcon(int slot)
     {
-        Destroy(itemArray[slot].itemObject);
+        Destroy(hotbarSlots[slot].itemIcon.gameObject);
     }
     public void UpdateSelected(int slot)
     {
-        Debug.Log($"{slot}");
-            var rectTrans = hotbar_icon_selected.GetComponent<RectTransform>();
-            Vector3 position = new Vector3 (-300, -450, 0);
-            position.x += 90 * (slot);
-            Vector3 pos = rectTrans.anchoredPosition3D;
-            pos.x = position.x;
-            rectTrans.anchoredPosition3D = pos;
-
-        Debug.Log($"{position}");
-    }
-
-    public void Hotbar(int hotbarSlot)
-    {
-        Vector3 position = new Vector3(-300, -450, 0);
-        while(hotbarSlot > 0)
-        {
-            Image iconEmpty = Instantiate(hotbar_icon_empty, emptySlots);
-            var rectTrans = iconEmpty.GetComponent<RectTransform>();
-            rectTrans.anchoredPosition3D = position;
-            position.x += 90;
-            hotbarSlot--;
-        }
+            selectedIconTrans.anchoredPosition = hotbarSlots[slot].trans.anchoredPosition;
+            Debug.Log($"{selectedIconTrans} highlight transform {hotbarSlots[slot].trans.anchoredPosition} slot transform");
     }
 }

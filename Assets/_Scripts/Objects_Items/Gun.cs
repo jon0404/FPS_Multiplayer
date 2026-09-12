@@ -2,38 +2,64 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
+using Mono.Cecil.Cil;
+using NUnit.Framework.Internal;
 using PurrNet;
 using PurrNet.StateMachine;
+using Unity.Cinemachine;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.AdaptivePerformance;
 using UnityEngine.InputSystem;
 
-public class Gun : StateNode
-{   
-    public float range;
+public class Gun : StateNode, IInitialize
+{
 
-    public Transform cam;
+    [SerializeField] private ScriptableObject properties;
+
+[ColorSpacer(0, 0.5f, 2, 1000, 0.57f, 0.57f, 0.57f)]
+[ColoredHeader("References", .77f, .77f, .77f, 15, -1)]
+
+    [SerializeField] private Transform rightHandTarget;
+    [SerializeField] private Transform leftHandTarget;
+    [SerializeField] private Transform rightIkTarget, leftIkTarget;
+    [SerializeField] private AudioSource audioSource;
+    Transform cam;
     public LayerMask validLayers;
     public GameObject muzzleFlare;
     [SerializeField] private GameObject gun;
     [SerializeField] private GameObject movingPart;
     [SerializeField] private InputActionReference shoot;
+[ColoredHeader("Bullet hit FX", .77f, .77f, .77f, 15, -1)] 
+    [SerializeField] List<GameObject> effects = new();
+[ColorSpacer(25, 5, 3, 120, 0.77f, 0.77f, 0.77f)]
+[Space (10)]
+[ColoredHeader("Gun Settings", .77f, .77f, .77f, 15, -1)]
     [SerializeField] private int damage = 10;
+    [SerializeField] public float range;
+
+[ColorSpacer(25, 5, 3, 120, 0.77f, 0.77f, 0.77f)]
+[Space (10)]    
+[ColoredHeader("Animation Settings", .77f, .77f, .77f, 15, -1)]
+    [SerializeField] private AnimationCurve positionCurve;
+    [SerializeField] private AnimationCurve rotationCurve;
+    [SerializeField] private AnimationCurve chargeCurve;
     [SerializeField] private float flareDisplayTime = .1f;    
-    [SerializeField] private List<GameObject> effects = new();
     [SerializeField] private float recoilDuration;
     [SerializeField] private float positionAmount;
     [SerializeField] private float rotationAmount;
     [SerializeField] private float chargeAmount;
-    [SerializeField] private Vector3 resetPosition;
-    [SerializeField] private Vector3 resetPosition2;
-    [SerializeField] private Quaternion resetRotation;
-    [SerializeField] private AnimationCurve positionCurve;
-    [SerializeField] private AnimationCurve rotationCurve;
-    [SerializeField] private AnimationCurve chargeCurve;
-    [SerializeField] private Transform rightHandTarget, leftHandTarget;
-    [SerializeField] private Transform rightIkTarget, leftIkTarget;
+[Space (7)]      
+[ColorSpacer(0, 0.5f, 2, 1000, 0.57f, 0.57f, 0.57f)]
+[Indent(1000)]  
+
+    [SerializeField] public bool The_end_of_the_script_bracket_needed_for_last_header_end_bracket = true;
     private Coroutine _recoilCoroutine;
+    private Vector3 resetPosition;
+    private Vector3 resetPosition2;
+    private Quaternion resetRotation;
+
     protected override void OnSpawned()
     {
 
@@ -52,14 +78,16 @@ public class Gun : StateNode
     }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     // Update is called once per frame
-    public override void StateUpdate(bool asServer)
+    public void Initialize(Player _player)
     {
-        base.StateUpdate(asServer);
+        cam = _player.cam.transform;
 
-        SetIkTargets();
+    }
+    void Update()
+    {
 
-        if(asServer)
-            return;
+        //SetIkTargets();
+
         if (!isOwner)
             return;
         if(!shoot.action.WasPressedThisFrame())
@@ -71,6 +99,7 @@ public class Gun : StateNode
     private void Shoot()
     {   
         Debug.Log("shot");
+        audioSource.Play();
         if(!Physics.Raycast(cam.position, cam.forward, out var hit, range, validLayers))
             return;
         Debug.Log("hit something");

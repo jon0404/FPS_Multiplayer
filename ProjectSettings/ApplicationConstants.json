@@ -1,3 +1,6 @@
 {
-  "projectId": "00d34ba6481eab9396bdf1a3bfb29e124e61678946cb394ba8a050cadfff6712"
+  "projectId": "00d34ba6481eab9396bdf1a3bfb29e124e61678946cb394ba8a050cadfff6712",
+  "PurrServices.build.apiKey": "pk_pub_888132fc212a2143ff0f56eb31bab43806b25138f38e2199628378fa01139817",
+  "PurrServices.build.projectId": "f6dd1c38-21b4-4502-9418-b8ab44c7d09b",
+  "PurrServices.build.projectName": "FPS_Multiplayer"
 }

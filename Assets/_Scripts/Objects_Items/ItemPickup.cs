@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class ItemPickup : NetworkBehaviour, IInteractable
 {
-    [SerializeField] GameObject itemPrefab;
+    public ItemData itemData;
     
     
     public void Interact(GameObject interactor)
     {
         var invManager = interactor.GetComponent<InventoryManager>();
-        invManager.PickupItem(itemPrefab);
-        //Destroy(this.gameObject);
+        invManager.PickupItem(itemData);
+        Destroy(this.gameObject);
     }
 }

@@ -12,3 +12,7 @@ public interface IItem
 {
     void ToggleItem(GameObject item);
 }
+public interface IInitialize
+{
+    void Initialize(Player player);
+}

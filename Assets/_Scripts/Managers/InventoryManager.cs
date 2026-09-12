@@ -1,12 +1,14 @@
 using System;
 using PurrNet;
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering.RenderGraphModule;
 using UnityEngine.UI;
 [System.Serializable]
 public class InventorySlot
 {
-    public GameObject itemPrefab;
+    public ItemData itemData;
 }
 
 public class InventoryManager : NetworkBehaviour
@@ -16,21 +18,28 @@ public class InventoryManager : NetworkBehaviour
     [SerializeField] float actualHotbarDelay;
     [SerializeField] float hotbarDelaySet = 0.5f;
     [SerializeField] float hotbarDelaySet2 = 0.15f;
-    [SerializeField] bool spedUpHotbar;
+    [SerializeField] bool spedUpHotbar = false;
     [SerializeField] InputActionReference next;
     [SerializeField] InputActionReference previous;
     [SerializeField] InputActionReference drop;
-    [SerializeField] GameObject player;
+    [SerializeField] float dropForce = 10;
+    [SerializeField] Player player;
+    [SerializeField] CinemachineCamera cam;
     [SerializeField] private InventorySlot[] invSlots = new InventorySlot[8];
     private GameObject equippedItem = null;
     [SerializeField] int activeItemSlot = 0;
     MainGameView ui;
-    int maxSlots;
+    public int maxSlots = 8;
     
     void Awake()
     {
-    
+        maxSlots = invSlots.Length;
+        for(int i = 0; i < maxSlots; i++)
+        {
+            invSlots[i] = new InventorySlot();
+            Debug.Log($"{invSlots}");
 
+        }
     }
 
     protected override void OnSpawned()
@@ -41,9 +50,9 @@ public class InventoryManager : NetworkBehaviour
 
     private void Start()
     {
-        maxSlots = invSlots.Length;
         InstanceHandler.GetInstance<MainGameView>().Hotbar(maxSlots);
         maxSlots--;
+
     }
 
     private void Update()
@@ -78,7 +87,7 @@ public class InventoryManager : NetworkBehaviour
         activeItemSlot++;
         if(activeItemSlot > maxSlots)
             activeItemSlot = 0;
-        Equip(invSlots[activeItemSlot].itemPrefab);
+        Equip(invSlots[activeItemSlot].itemData);
     }
 
     private void PreviousSlot()
@@ -86,29 +95,28 @@ public class InventoryManager : NetworkBehaviour
         activeItemSlot--;
         if(activeItemSlot < 0)
             activeItemSlot = maxSlots;
-        Equip(invSlots[activeItemSlot].itemPrefab);
+        Equip(invSlots[activeItemSlot].itemData);
 
     }
 
-    private void Equip(GameObject _itemPrefab)
+    private void Equip(ItemData _itemData)
     {
+        InstanceHandler.GetInstance<MainGameView>().UpdateSelected(activeItemSlot);
         if(spedUpHotbar == false)
             actualHotbarDelay = hotbarDelaySet;
         if(spedUpHotbar == true)
             actualHotbarDelay = hotbarDelaySet2;
         spedUpHotbar = true;
-        InstanceHandler.GetInstance<MainGameView>().UpdateSelected(activeItemSlot);
-        Debug.Log($"{activeItemSlot}");
         if(equippedItem != null)
         {         
             Destroy(equippedItem);
             equippedItem = null;
         }
-        if(_itemPrefab != null)
+        if(_itemData != null)
         {
-            equippedItem = Instantiate(_itemPrefab, transform.position, transform.rotation, transform);
-            Debug.Log($"SPAWNED: {equippedItem.name} | ID: {equippedItem.GetEntityId()}");
-            Debug.Log($"{equippedItem.name} equipped");
+            equippedItem = Instantiate(_itemData.itemPrefab, player.rotationMimic.transform);
+            equippedItem.TryGetComponent<IInitialize>(out var iinitialize);
+            iinitialize.Initialize(player);
         }
     }
 
@@ -117,36 +125,34 @@ public class InventoryManager : NetworkBehaviour
         if(equippedItem == null)
             return;
         InstanceHandler.GetInstance<MainGameView>().DeleteItemIcon(activeItemSlot);  
-        Debug.Log($"DROPPING: {equippedItem.name} | ID: {equippedItem.GetEntityId()}");
-
         Destroy(equippedItem);
+        Vector3 spawnPosition = cam.transform.position + cam.transform.forward * 1f;
+
+        var droppedItem = Instantiate(invSlots[activeItemSlot].itemData.pickup_itemPrefab, spawnPosition, cam.transform.rotation);
+        droppedItem.GetComponent<ItemPickup>().itemData = invSlots[activeItemSlot].itemData;
+        Rigidbody rb = droppedItem.GetComponent<Rigidbody>();
+        rb.AddForce(cam.transform.forward * dropForce, ForceMode.Impulse);
         equippedItem = null;
-        Debug.Log($"{equippedItem} still here?");
-        invSlots[activeItemSlot].itemPrefab = null;
+        invSlots[activeItemSlot].itemData = null;
 
     }
 
-    public void PickupItem(GameObject _itemPrefab)
+    public void PickupItem(ItemData _itemData)
     {
-        int firstFreeSlot = Array.FindIndex(invSlots, slot => slot.itemPrefab == null);
-        Debug.Log($"{firstFreeSlot} Inventory slot ");    
+        int firstFreeSlot = Array.FindIndex(invSlots, slot => slot.itemData == null);
         if(firstFreeSlot < 0)
             return;
         if(equippedItem == null)
         {
-            invSlots[activeItemSlot].itemPrefab = _itemPrefab;
-            Equip(invSlots[activeItemSlot].itemPrefab);
-            Debug.Log($"{invSlots[activeItemSlot].itemPrefab} equipped itemPrefab");
+            invSlots[activeItemSlot].itemData = Instantiate(_itemData);
+            Equip(invSlots[activeItemSlot].itemData);
             firstFreeSlot = activeItemSlot;
         }
         else
         {
-            invSlots[firstFreeSlot].itemPrefab = _itemPrefab;
-            Debug.Log($"Slot {firstFreeSlot} now contains: {invSlots[firstFreeSlot].itemPrefab}");
-            Debug.Log($"{firstFreeSlot} set new item to that and didnt equip");
+            invSlots[firstFreeSlot].itemData = _itemData;
         }
-        Item _icon = _itemPrefab.GetComponent<Item>();   
-        InstanceHandler.GetInstance<MainGameView>().UpdateItemIcon(_icon, firstFreeSlot);
+        InstanceHandler.GetInstance<MainGameView>().UpdateItemIcon(_itemData.itemIcon, firstFreeSlot);
         
     }
     
