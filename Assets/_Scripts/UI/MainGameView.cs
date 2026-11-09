@@ -27,24 +27,31 @@ public class MainGameView : View
 
     private void Awake()
     {
-        InstanceHandler.RegisterInstance(this);   
-        selectedIconTrans = hotbar_icon_selected.GetComponent<RectTransform>();
+        InstanceHandler.RegisterInstance(this);
+
+        if (hotbar_icon_selected != null)
+            selectedIconTrans = hotbar_icon_selected.GetComponent<RectTransform>();
     }
 
     public void Hotbar(int slotCount)
     {
+        if (hotbar_icon_empty == null || emptySlots == null)
+            return;
+
         hotbarSlots = new HotbarSlots[slotCount];
         Vector3 position = new Vector3(-300, -450, 0);
         InstanceHandler.RegisterInstance(this);
-        for(int i = 0; i < hotbarSlots.Length; i++)
+        for (int i = 0; i < hotbarSlots.Length; i++)
         {
             hotbarSlots[i] = new HotbarSlots();
             hotbarSlots[i].emptyIcon = Instantiate(hotbar_icon_empty, emptySlots);
             hotbarSlots[i].emptyIcon.rectTransform.anchoredPosition = position;
             position.x += 90;
-            hotbarSlots[i].trans = hotbarSlots[i].emptyIcon.rectTransform;      
+            hotbarSlots[i].trans = hotbarSlots[i].emptyIcon.rectTransform;
         }
-        UpdateSelected(0);
+
+        if (selectedIconTrans != null)
+            UpdateSelected(0);
     }
     
 
@@ -65,24 +72,33 @@ public class MainGameView : View
 
     public void UpdateHealth(int health)
     {
-        healthText.text = health.ToString();
+        if (healthText != null)
+            healthText.text = health.ToString();
     }
 
     public void UpdateItemIcon(Image itemIcon, int slot)
     {
+        if (hotbarSlots == null || slot < 0 || slot >= hotbarSlots.Length || itemIcon == null)
+            return;
+
         hotbarSlots[slot].itemIcon = Instantiate(itemIcon, emptySlots);
         hotbarSlots[slot].itemIcon.rectTransform.anchoredPosition = hotbarSlots[slot].trans.anchoredPosition;
-
-
     }
 
     public void DeleteItemIcon(int slot)
     {
+        if (hotbarSlots == null || slot < 0 || slot >= hotbarSlots.Length || hotbarSlots[slot].itemIcon == null)
+            return;
+
         Destroy(hotbarSlots[slot].itemIcon.gameObject);
+        hotbarSlots[slot].itemIcon = null;
     }
+
     public void UpdateSelected(int slot)
     {
-            selectedIconTrans.anchoredPosition = hotbarSlots[slot].trans.anchoredPosition;
-            Debug.Log($"{selectedIconTrans} highlight transform {hotbarSlots[slot].trans.anchoredPosition} slot transform");
+        if (hotbarSlots == null || selectedIconTrans == null || slot < 0 || slot >= hotbarSlots.Length || hotbarSlots[slot] == null || hotbarSlots[slot].trans == null)
+            return;
+
+        selectedIconTrans.anchoredPosition = hotbarSlots[slot].trans.anchoredPosition;
     }
 }

@@ -334,6 +334,7 @@ GameObject:
   - component: {fileID: 1377623436002557804}
   - component: {fileID: 1110791626759830063}
   - component: {fileID: 531691384302479966}
+  - component: {fileID: -4589459578126346832}
   m_Layer: 10
   m_Name: pickup.desert_eagle
   m_TagString: Untagged
@@ -429,6 +430,18 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!114 &-4589459578126346832
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5675435814262967275}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09992954862fcea4eb3aaf6c80ec0694, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoundResettable
 --- !u!1 &6011741619095921032
 GameObject:
   m_ObjectHideFlags: 0

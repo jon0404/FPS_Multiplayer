@@ -8,11 +8,16 @@ public class Player : MonoBehaviour
     public GameObject rotationMimic;
 
     public PlayerController playerController { get; private set; }
-    void Awake()
+
+    private void Awake()
     {
         inventoryManager = GetComponent<InventoryManager>();
-        //cam = GetComponentInChildren<CinemachineCamera>();
         playerController = GetComponent<PlayerController>();
 
+        if (cam == null)
+            cam = GetComponentInChildren<CinemachineCamera>();
+
+        if (rotationMimic == null)
+            rotationMimic = gameObject;
     }
 }

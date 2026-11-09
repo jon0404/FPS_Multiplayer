@@ -4,12 +4,14 @@ using UnityEngine;
 
 public class PlayerHealth : NetworkBehaviour
 {
-    [SerializeField] private SyncVar<int> health = new(initialValue: 100); //a syncvar object with reference variable health
+    // Shared health value for the owner and remote clients.
+    [SerializeField] private SyncVar<int> health = new(initialValue: 100);
     [SerializeField] private int selfLayer, otherLayer;
 
-    public Action<PlayerID> onDeath_Server; //variable that holds a reference to a method that accepts PlayerHealth objects and returns void
+    public Action<PlayerID> onDeath_Server;
 
-    public int Health => health;
+    // Exposes the current health value without allowing direct mutation.
+    public int Health => health.value;
 
     protected override void OnSpawned()
     {
@@ -20,7 +22,10 @@ public class PlayerHealth : NetworkBehaviour
 
         if (isOwner)
         {
-            InstanceHandler.GetInstance<MainGameView>().UpdateHealth(health.value);
+            var mainGameView = InstanceHandler.GetInstance<MainGameView>();
+            if (mainGameView != null)
+                mainGameView.UpdateHealth(health.value);
+
             health.onChanged += OnHealthChanged;
         }
     }
@@ -31,28 +36,34 @@ public class PlayerHealth : NetworkBehaviour
 
         health.onChanged -= OnHealthChanged;
     }
-    
+
     private void OnHealthChanged(int newHealth)
     {
-        InstanceHandler.GetInstance<MainGameView>().UpdateHealth(newHealth);
+        var mainGameView = InstanceHandler.GetInstance<MainGameView>();
+        if (mainGameView != null)
+            mainGameView.UpdateHealth(newHealth);
     }
 
     private void SetLayerRecursive(GameObject obj, int layer)
     {
+        if (obj == null)
+            return;
+
         obj.layer = layer;
 
-        foreach (Transform child in obj.transform) // enumerates the transform and gets the transforms of children (idk)
+        foreach (Transform child in obj.transform)
         {
             SetLayerRecursive(child.gameObject, layer);
-
         }
     }
 
-    [ServerRpc(requireOwnership:false)]
+    [ServerRpc(requireOwnership: false)]
     public void ChangeHealth(int amount)
     {
         health.value += amount;
-        if(health <= 0)
+
+        // The player is eliminated when health reaches zero or below.
+        if (health.value <= 0)
         {
             onDeath_Server?.Invoke(owner.Value);
             Destroy(gameObject);

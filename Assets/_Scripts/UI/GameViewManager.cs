@@ -1,10 +1,10 @@
 using UnityEngine;
 using System.Collections.Generic;
 using PurrNet;
-using System;
 
 public class GameViewManager : MonoBehaviour
 {
+    // Keeps a list of all screens in the UI so they can be shown/hidden together.
     [SerializeField] private List<View> allViews = new();
     [SerializeField] private View defaultView;
 
@@ -14,9 +14,12 @@ public class GameViewManager : MonoBehaviour
 
         foreach (var view in allViews)
         {
-            HideViewInternal(view);
+            if (view != null)
+                HideViewInternal(view);
         }
-        ShowViewInternal(defaultView);
+
+        if (defaultView != null)
+            ShowViewInternal(defaultView);
     }
 
     private void OnDestroy()
@@ -28,14 +31,16 @@ public class GameViewManager : MonoBehaviour
     {
         foreach (var view in allViews)
         {
+            if (view == null)
+                continue;
+
             if (view.GetType() == typeof(T))
             {
                 ShowViewInternal(view);
             }
-            else
+            else if (hideOthers)
             {
-                if(hideOthers)
-                    HideViewInternal(view);
+                HideViewInternal(view);
             }
         }
     }
@@ -44,20 +49,30 @@ public class GameViewManager : MonoBehaviour
     {
         foreach (var view in allViews)
         {
-            if(view.GetType() == typeof(T))
+            if (view != null && view.GetType() == typeof(T))
                 HideViewInternal(view);
         }
     }
 
     private void ShowViewInternal(View view)
     {
-        view.canvasGroup.alpha = 1;
+        if (view == null)
+            return;
+
+        if (view.canvasGroup != null)
+            view.canvasGroup.alpha = 1;
+
         view.OnShow();
     }
 
     private void HideViewInternal(View view)
     {
-        view.canvasGroup.alpha = 0;
+        if (view == null)
+            return;
+
+        if (view.canvasGroup != null)
+            view.canvasGroup.alpha = 0;
+
         view.OnHide();
     }
 }
